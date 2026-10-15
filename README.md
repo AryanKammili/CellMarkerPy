@@ -13,7 +13,7 @@ A Python implementation of ScType-inspired cell type annotation using
 
 <br>
 
-[![Read My Research](https://img.shields.io/badge/📄_Read_My_Research_Paper-2563EB?style=for-the-badge)](docs/ScType_explanation_implementation.pdf)
+[![Read My Process Description](https://img.shields.io/badge/📄_Read_My_Research_Paper-2563EB?style=for-the-badge)](docs/ScType_explanation_implementation.pdf)
 
 <br>
 
