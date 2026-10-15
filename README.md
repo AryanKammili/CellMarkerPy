@@ -132,8 +132,8 @@ $$
 X'_{ij} = \ln(1 + X_{ij})
 $$
 
-where \(X_{ij}\) represents the normalized expression of gene \(j\)
-in cell \(i\).
+where $X_{ij}$ represents the normalized expression of gene $j$
+in cell $i$.
 
 **Feature Scaling**
 
@@ -221,13 +221,13 @@ others are relatively specific to a particular population.
 To account for this, the implementation assigns each marker a
 specificity weight based on its frequency across candidate cell types.
 
-For a marker \(g\):
+For a marker $g$:
 
 $$
 w_g = \frac{1}{N_g}
 $$
 
-where \(N_g\) is the number of candidate cell types containing that
+where $N_g$ is the number of candidate cell types containing that
 marker in the corresponding positive or negative marker dictionary.
 
 A gene associated with only one cell type receives a weight of 1.
@@ -249,9 +249,9 @@ The implemented scoring function can be represented as:
 
 $$
 S(c,t) =
-\frac{\sum_{g \in P_t} w_g^+ \bar{x}_{c,g}}{\sqrt{|P_t|}}
+\frac{\sum_{g \in P_t} w_g^{+} \bar{x}_{c,g}}{\sqrt{|P_t|}}
 -
-\frac{\sum_{g \in N_t} w_g^- \bar{x}_{c,g}}{\sqrt{|N_t|}}
+\frac{\sum_{g \in N_t} w_g^{-} \bar{x}_{c,g}}{\sqrt{|N_t|}}
 $$
 
 where:
@@ -259,7 +259,7 @@ where:
 - $S(c,t)$ is the score for cell type $t$ in cluster $c$.
 - $P_t$ and $N_t$ are the available positive and negative markers.
 - $\bar{x}_{c,g}$ is the mean expression of gene $g$ across cluster $c$.
-- $w_g^+$ and $w_g^-$ are marker-specificity weights.
+- $w_g^{+}$ and $w_g^{-}$ are marker-specificity weights.
 
 The score is normalized by the square root of the number of
 available markers in each set.
@@ -274,7 +274,7 @@ Each cluster is assigned the candidate cell type with the
 highest calculated score:
 
 $$
-\hat{t}_c = \underset{t}{\operatorname{argmax}} \; S(c,t)
+\hat{t}_c = \underset{t}{\mathrm{arg\,max}} \; S(c,t)
 $$
 
 The resulting labels are stored in the AnnData object:
@@ -506,6 +506,8 @@ The paper documents the theoretical foundation of the original
 ScType framework and the concepts guiding this Python implementation.
 
 **[📄 Read the Full Technical Paper](docs/ScType_explanation_implementation.pdf)**
+
+---
 
 ## 📚 References
 
