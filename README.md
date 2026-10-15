@@ -160,6 +160,16 @@ the expression matrix while retaining major sources of variation.
 sc.tl.pca(adata)
 ```
 
+This transformation can be represented as:
+
+$$
+Z = X''_{g,n} W ^ T
+$$
+
+- $X''_{g,n}$ is the transformed dataset
+- $W^T$ is a matrix of the top eigenvectors of the covariance matrix
+-$Z$ is the final top computed PCA components
+
 This provides a lower-dimensional representation for downstream
 neighborhood graph construction and clustering. This allows for computational tasks to be signficiantly faster as the data is far less complex. PCA was able to reduce almost ~100 dimensions.
 
@@ -255,33 +265,27 @@ using its positive and negative marker sets.
 Positive marker expression contributes to the classification score,
 while negative marker expression is subtracted.
 
-The implemented scoring function can be represented as:
+The implemented scoring function (known as the marker enrichment formula)can be represented as:
 
 $$
-S(c,t) =
-\frac{\sum_{g \in P_t} w_g^{+} \bar{x}_{c,g}}{\sqrt{|P_t|}}
--
-\frac{\sum_{g \in N_t} w_g^{-} \bar{x}_{c,g}}{\sqrt{|N_t|}}
+x'_c = \frac{\sum_{i=1}^{j} x'_i}{\sqrt{j}} - \frac{\sum_{i=1}^{l} x'_i}{\sqrt{l}}
 $$
 
-where:
+Where:
 
-- $S(c,t)$ is the score for cell type $t$ in cluster $c$.
-- $P_t$ and $N_t$ are the available positive and negative markers.
-- $\bar{x}_{c,g}$ is the mean expression of gene $g$ across cluster $c$.
-- $w_g^{+}$ and $w_g^{-}$ are marker-specificity weights.
+- $x'_c$ is the marker enrichment score for a cell.
+- $j$ is the number of positive markers.
+- $l$ is the number of negative markers.
+- $x'_i$ represents the transformed expression value of a positive or negative marker, depending on the summation.
 
-The score is normalized by the square root of the number of
-available markers in each set.
+The score is normalized by the square root of the number of available markers in each set.
 
-If no negative markers are available, the negative contribution
-is set to zero. Candidate cell types without positive markers
+If no negative markers are available, the negative contribution is set to zero. Candidate cell types without positive markers
 in the dataset are skipped.
 
 **Final Classification**
 
-Each cluster is assigned the candidate cell type with the
-highest calculated score:
+Each cluster is assigned the candidate cell type with the highest calculated score:
 
 $$
 \hat{t}_c = \underset{t}{\mathrm{arg\,max}} \; S(c,t)
@@ -295,8 +299,7 @@ adata.obs["manual_annotations"] = (
 )
 ```
 
-This produces an interpretable, marker-based annotation
-for each cell cluster.
+This produces an interpretable, marker-based annotation for each cell cluster.
 
 ---
 
@@ -341,93 +344,10 @@ This provides precision, recall, F1-score, and support for the
 evaluated cell types.
 
 The repository includes preprocessing scripts for exploring PBMC,
-kidney, and prostate datasets.
+kidney, and prostate datasets. 
 
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-The project is written in Python and uses the following primary
-dependencies:
-
-- Scanpy
-- AnnData
-- NumPy
-- pandas
-- scikit-learn
-- igraph
-- leidenalg
-
-### Installation
-
-Clone the repository:
-
-```bash
-git clone https://github.com/AryanKammili/Cell-Type-Annotation.git
-
-cd Cell-Type-Annotation
-```
-
-Create and activate a virtual environment:
-
-```bash
-python -m venv .venv
-
-source .venv/bin/activate
-```
-
-Install the required libraries:
-
-```bash
-pip install scanpy anndata numpy pandas scikit-learn igraph leidenalg
-```
-
-### Running the Project
-
-The current implementation consists of separate preprocessing scripts
-and a marker-based annotation script.
-
-For the PBMC workflow:
-
-**Step 1 — Prepare the data**
-
-Place the required PBMC expression matrix and reference annotations
-at the paths expected by `pbmcData.py`.
-
-Create the output directory:
-
-```bash
-mkdir -p pickle
-```
-
-Run preprocessing:
-
-```bash
-python pbmcData.py
-```
-
-This normalizes the expression matrix, performs feature scaling
-and PCA, and saves the processed AnnData object.
-
-**Step 2 — Run cell annotation**
-
-```bash
-python model.py
-```
-
-The annotation script loads the preprocessed PBMC data, constructs
-cell neighborhoods, performs Leiden clustering, calculates marker
-scores, and generates annotated UMAP plots.
-
-**Note:** The repository currently uses local dataset paths, and the
-raw datasets are not included in the tracked repository files.
-The input data must be supplied before running the complete workflow.
-
-The current `model.py` is configured for PBMC annotation. Other
-tissue workflows require updating the relevant dataset path and
-marker dictionary selection.
+### Results
+In general I was able to recreate accuracy of the model within 8%. Averaging 92% accuracy on Kidney Data and 88% on PBMC Data. The main reason for the discrpency in accuracy is a simplified the algorithm of ScType along with a better curation of markers per cell types.
 
 ---
 
@@ -476,33 +396,12 @@ Cell-Type-Annotation/
 | **Leiden Algorithm** | Graph-based community detection |
 | **UMAP** | Low-dimensional visualization |
 
----
-
-## 🔮 Future Improvements
-
-Potential extensions include:
-
-- **Confidence-based classification:** Introduce score thresholds
-  to identify clusters with insufficient evidence for annotation.
-
-- **Expanded marker databases:** Incorporate additional tissues,
-  cell populations, and curated gene markers.
-
-- **Improved generalization:** Evaluate marker weighting across
-  datasets with different sequencing technologies and cell populations.
-
-- **Benchmarking:** Compare annotation performance against ScType
-  and other established cell annotation tools.
-
-- **Reusable API:** Package the annotation algorithm into callable
-  functions for integration with existing Scanpy workflows.
 
 ---
 
 ## 📄 Research & Documentation
 
-This implementation was developed alongside an independent
-technical exploration of the ScType algorithm.
+This implementation was developed alongside an independent technical exploration of the ScType algorithm.
 
 My accompanying paper examines:
 
