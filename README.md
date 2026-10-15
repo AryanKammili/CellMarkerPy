@@ -288,7 +288,7 @@ in the dataset are skipped.
 Each cluster is assigned the candidate cell type with the highest calculated score:
 
 $$
-\hat{t}_c = \underset{t}{\mathrm{arg\,max}} \; S(c,t)
+\hat{t}_c = \underset{t}{\mathrm{argmax}} \; S(c,t)
 $$
 
 The resulting labels are stored in the AnnData object:
