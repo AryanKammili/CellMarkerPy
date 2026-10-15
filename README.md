@@ -29,17 +29,20 @@ A Python implementation of ScType-inspired cell type annotation using
 
 ## 🌟 Highlights
 
-- **Automated cell type annotation:** Assigns biological identities to
-  cell clusters using known gene expression markers.
+- **Automated cell type annotation:** Assigns different cell types to
+  clusters using known gene expression markers derived from literature.
 
 - **Positive and negative marker scoring:** Rewards expression of
-  characteristic genes while penalizing expression of contradictory markers.
+  more rare genes while 'penalizing' genes that are more common across 
+  multiple cell types.
 
 - **Specificity-weighted classification:** Dynamically weights markers
-  according to how frequently they appear across candidate cell types.
+  according to how frequently they appear across candidate cell types to 
+  allow certain genes to hold more 'weight'.
 
 - **Tissue-specific marker dictionaries:** Supports configurable marker
-  definitions for different tissues and cell populations.
+  definitions for different tissues and cell populations to improve
+  accuracy per sample type.
 
 - **Scanpy-based processing:** Integrates normalization, dimensionality
   reduction, neighborhood graphs, and Leiden clustering.
@@ -51,24 +54,25 @@ A Python implementation of ScType-inspired cell type annotation using
 
 ## 🔬 Overview
 
-Single-cell RNA sequencing (scRNA-seq) enables researchers to study gene
-expression at the resolution of individual cells. However, identifying
-the biological identity of each cell remains a challenging step in
-single-cell analysis.
+Single-cell RNA sequencing has been a technology existing for many years.
+However, the technology to computationally analyze this type of data is
+relatively new. Being able to idenitfy the biological identity of each 
+cell computationally has increased productivity of lab ten-fold. 
 
-Traditional workflows often require researchers to manually inspect
-clusters and identify their characteristic marker genes. This process
-can be time-consuming, particularly for large datasets containing
-multiple cell populations.
+However, many prediction models fail to gain a high accuracy in comparison 
+to wet lab manual sequencing. The process developed by ScType has yielded
+accuracy rates much higher than past methods due to the fact that makers were 
+made specifically per cell type.
 
 **Cell Type Annotation** explores a programmatic approach to this problem.
 
 Inspired by [ScType](https://github.com/IanevskiAleksandr/sc-type),
 an automated cell annotation method originally developed using R and
 Seurat, this project implements a marker-based classification workflow
-in Python using the Scanpy ecosystem.
+in Python using the Scanpy library instead for my application to 
+the Digital Biology Lab at Univeristy of Missouri.
 
-The central idea is straightforward:
+The central idea is pretty straightforward:
 
 > A cell population can be identified not only by the genes it expresses,
 > but also by the genes it is expected **not** to express.
@@ -132,14 +136,20 @@ $$
 X'_{ij} = \ln(1 + X_{ij})
 $$
 
-where $X_{ij}$ represents the normalized expression of gene $j$
-in cell $i$.
+where $X_{ij}$ represents the normalized expression of gene $j$ in cell $i$.
 
-**Feature Scaling**
+**Z Score Normalization**
 
-Expression values are subsequently scaled using scikit-learn's
-`StandardScaler`, with mean-centering disabled to preserve sparse
-matrix compatibility.
+Expression values are subsequently scaled using a z-scale transformation to represent how likely each expression is to occur in relation to other gene's. 
+
+This transformation is done to allow for relative comparison:
+
+$$
+X''_{g,n} = \frac{X'_{g,n} - \mu_g}{\sigma_g}
+$$
+
+- $\mu_g$ is the mean expression of gene $g$.
+- $\sigma_g$ is the standard deviation of gene $g$.
 
 **Dimensionality Reduction**
 
@@ -151,12 +161,12 @@ sc.tl.pca(adata)
 ```
 
 This provides a lower-dimensional representation for downstream
-neighborhood graph construction and clustering.
+neighborhood graph construction and clustering. This allows for computational tasks to be signficiantly faster as the data is far less complex. PCA was able to reduce almost ~100 dimensions.
 
 ### 2. Leiden Clustering
 
 Following preprocessing, the algorithm constructs a neighborhood graph
-representing similarities between cells.
+representing similarities between cells in relation to gene expression.
 
 ```python
 sc.pp.neighbors(adata, random_state=42)
@@ -170,15 +180,13 @@ sc.tl.leiden(
 )
 ```
 
-Leiden clustering identifies communities of transcriptionally similar
-cells in this graph.
+Leiden clustering identifies communities of transcriptionally similar cells in this graph.
 
-Each resulting cluster represents a candidate cell population that
-must be assigned a biological identity.
+Each resulting cluster is going to represent 
+a certain cell type. 
 
-The clustering resolution can be adjusted to control the granularity
-of the identified populations.
-
+The clustering resolution is a hyper parameter 
+that influences the amount of clusters created.
 ### 3. Dynamic Marker Dictionary
 
 A key component of the project is its configurable marker database.
@@ -195,6 +203,8 @@ Each candidate cell type is associated with two sets of genes:
 
 For example, a simplified T-cell marker definition might look like:
 
+While this dicitonary setup is not optimal for larger scale projects this was okay for this project.
+
 ```python
 marker_dictionary = {
     "T cells": {
@@ -205,7 +215,7 @@ marker_dictionary = {
 ```
 
 Here, expression of `CD3D` and `CD3E` supports a T-cell classification,
-while expression of `CD14` provides evidence against it.
+while expression of `CD14` does the opposite and indicates there is a lower chance of a cell being a 'T Cell' if CD14 exists.
 
 The marker dictionary can be modified to incorporate additional
 cell types, tissues, and biological markers without changing the
@@ -224,11 +234,11 @@ specificity weight based on its frequency across candidate cell types.
 For a marker $g$:
 
 $$
-w_g = \frac{1}{N_g}
+w_g = \frac{1}{n_g}
 $$
 
-where $N_g$ is the number of candidate cell types containing that
-marker in the corresponding positive or negative marker dictionary.
+where $n_g$ is the number of candidate cell types containing that
+marker in the corresponding positive or negative marker dictionary. In lament terms, if the gene appears more it is given less 'weight' using an inverse function.
 
 A gene associated with only one cell type receives a weight of 1.
 
