@@ -11,6 +11,12 @@ A Python implementation of ScType-inspired cell type annotation using
 [![Scanpy](https://img.shields.io/badge/Scanpy-Scientific_Computing-1976D2?style=for-the-badge)](https://scanpy.readthedocs.io/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
 
+<br>
+
+[![Read My Research](https://img.shields.io/badge/📄_Read_My_Research_Paper-2563EB?style=for-the-badge)](docs/ScType_explanation_implementation.pdf)
+
+<br>
+
 [Overview](#-overview) •
 [Methodology](#-methodology) •
 [Getting Started](#-getting-started) •
@@ -243,19 +249,17 @@ The implemented scoring function can be represented as:
 
 $$
 S(c,t) =
-\frac{\sum_{g \in P_t} w_g^+ \bar{x}_{c,g}}
-{\sqrt{|P_t|}}
+\frac{\sum_{g \in P_t} w_g^+ \bar{x}_{c,g}}{\sqrt{|P_t|}}
 -
-\frac{\sum_{g \in N_t} w_g^- \bar{x}_{c,g}}
-{\sqrt{|N_t|}}
+\frac{\sum_{g \in N_t} w_g^- \bar{x}_{c,g}}{\sqrt{|N_t|}}
 $$
 
 where:
 
-- \(S(c,t)\) is the score for cell type \(t\) in cluster \(c\).
-- \(P_t\) and \(N_t\) are the available positive and negative markers.
-- \(\bar{x}_{c,g}\) is the mean expression of gene \(g\) across cluster \(c\).
-- \(w_g^+\) and \(w_g^-\) are marker-specificity weights.
+- $S(c,t)$ is the score for cell type $t$ in cluster $c$.
+- $P_t$ and $N_t$ are the available positive and negative markers.
+- $\bar{x}_{c,g}$ is the mean expression of gene $g$ across cluster $c$.
+- $w_g^+$ and $w_g^-$ are marker-specificity weights.
 
 The score is normalized by the square root of the number of
 available markers in each set.
@@ -270,7 +274,7 @@ Each cluster is assigned the candidate cell type with the
 highest calculated score:
 
 $$
-\hat{t}_c = \arg\max_t S(c,t)
+\hat{t}_c = \underset{t}{\operatorname{argmax}} \; S(c,t)
 $$
 
 The resulting labels are stored in the AnnData object:
@@ -281,8 +285,8 @@ adata.obs["manual_annotations"] = (
 )
 ```
 
-This produces an interpretable, marker-based annotation for each
-cell cluster.
+This produces an interpretable, marker-based annotation
+for each cell cluster.
 
 ---
 
@@ -484,6 +488,24 @@ Potential extensions include:
   functions for integration with existing Scanpy workflows.
 
 ---
+
+## 📄 Research & Documentation
+
+This implementation was developed alongside an independent
+technical exploration of the ScType algorithm.
+
+My accompanying paper examines:
+
+- The biological principles behind marker-based cell annotation.
+- Gene expression normalization and dimensionality reduction.
+- Graph-based clustering of single-cell populations.
+- Positive and negative marker classification.
+- Marker specificity weighting and cell type scoring.
+
+The paper documents the theoretical foundation of the original
+ScType framework and the concepts guiding this Python implementation.
+
+**[📄 Read the Full Technical Paper](docs/ScType_explanation_implementation.pdf)**
 
 ## 📚 References
 
